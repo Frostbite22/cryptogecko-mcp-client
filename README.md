@@ -1,70 +1,100 @@
-# Getting Started with Create React App
+## Client Setup
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+### Prerequisites
 
-## Available Scripts
+- Node.js 18+
+- npm or yarn
 
-In the project directory, you can run:
+### Installation
 
-### `npm start`
+1. Create a new React project:
+   ```bash
+   npx create-react-app crypto-mcp-client
+   cd crypto-mcp-client
+   ```
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+2. Install required dependencies:
+   ```bash
+   npm install @anthropic-ai/mcp-client tailwindcss
+   ```
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+3. Set up Tailwind CSS:
+   ```bash
+   npx tailwindcss init
+   ```
 
-### `npm test`
+4. Update `tailwind.config.js`:
+   ```javascript
+   /** @type {import('tailwindcss').Config} */
+   module.exports = {
+     content: [
+       "./src/**/*.{js,jsx,ts,tsx}",
+     ],
+     theme: {
+       extend: {},
+     },
+     plugins: [],
+   }
+   ```
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+5. Add Tailwind directives to your CSS:
+   ```css
+   /* src/index.css */
+   @tailwind base;
+   @tailwind components;
+   @tailwind utilities;
+   ```
 
-### `npm run build`
+6. Create TypeScript files:
+   - Save the TypeScript client code to `src/CryptoMcpClient.ts`
+   - Save the React component code to `src/CryptoDashboard.tsx`
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+7. Update `src/App.tsx` to use the dashboard:
+   ```tsx
+   import React from 'react';
+   import './App.css';
+   import CryptoDashboard from './CryptoDashboard';
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+   function App() {
+     return (
+       <div className="App">
+         <CryptoDashboard />
+       </div>
+     );
+   }
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+   export default App;
+   ```
 
-### `npm run eject`
+8. Start the client:
+   ```bash
+   npm start
+   ```
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+The client will be available at `http://localhost:3000`.
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## MCP Communication Flow
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+1. The client connects to the server using Server-Sent Events (SSE) at the `/sse` endpoint
+2. The client creates a session with the server
+3. The client calls MCP tools provided by the server
+4. Communication between client and server happens through:
+   - SSE connection for server-to-client messages
+   - POST requests to `/messages/` for client-to-server messages
+5. The server processes requests and returns results through the established SSE connection
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+## Available Tools
 
-## Learn More
+The server exposes four main tools:
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+1. **get_price**: Get cryptocurrency prices in various currencies
+   - Parameters: `vs_currencies`, `ids`, `symbols`
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+2. **get_coin_list**: Get list of all available coins
+   - No parameters required
 
-### Code Splitting
+3. **get_market_data**: Get detailed market data for cryptocurrencies
+   - Parameters: `vs_currency`, `ids`, `category`, `order`, `per_page`, `page`, `sparkline`
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+4. **get_trending**: Get trending coins in the last 24 hours
+   - No parameters required
