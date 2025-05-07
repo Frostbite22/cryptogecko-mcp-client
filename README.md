@@ -15,7 +15,7 @@
 
 2. Install required dependencies:
    ```bash
-   npm install @anthropic-ai/mcp-client tailwindcss
+   npm install @modelcontextprotocol/sdk tailwindcss
    ```
 
 3. Set up Tailwind CSS:
@@ -65,7 +65,33 @@
 
    export default App;
    ```
-
+9. Add tsconfig.json
+    ```json
+    {
+    "compilerOptions": {
+        "target": "es5",
+        "lib": ["dom", "dom.iterable", "esnext"],
+        "allowJs": true,
+        "skipLibCheck": true,
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
+        "strict": true,
+        "forceConsistentCasingInFileNames": true,
+        "noFallthroughCasesInSwitch": true,
+        "module": "esnext",
+        "moduleResolution": "node",
+        "resolveJsonModule": true,
+        "isolatedModules": true,
+        "noEmit": true,
+        "jsx": "react-jsx",
+        "baseUrl": ".",
+        "paths": {
+        "@modelcontextprotocol/sdk/*": ["node_modules/@modelcontextprotocol/sdk/*"]
+        }
+    },
+    "include": ["src"]
+    }
+    ```
 8. Start the client:
    ```bash
    npm start
