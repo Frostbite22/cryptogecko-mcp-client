@@ -16,8 +16,13 @@
 2. Install required dependencies:
    ```bash
    npm install @modelcontextprotocol/sdk tailwindcss
+   npm install @anthropic-ai/sdk
    ```
 
+You might need sometimes to use legacy peer dependencies 
+```bash
+--legacy-peer-deps
+```
 3. Set up Tailwind CSS:
    ```bash
    npx tailwindcss init
