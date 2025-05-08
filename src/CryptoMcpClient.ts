@@ -153,6 +153,8 @@ async processQuery(query : string) {
                     arguments : toolArgs
                 });
 
+                console.log("Tool result:", result);
+
                 toolResults.push(result);
 
                 finalText.push(`Tool ${toolName} called with arguments: ${JSON.stringify(toolArgs)}`);
@@ -316,6 +318,6 @@ async function main() {
 }
 
 // Uncomment to run the example
-main();
+// main();
 
 export default CryptoMcpClient;
