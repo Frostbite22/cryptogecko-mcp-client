@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.41.0",
     "@modelcontextprotocol/sdk": "^1.11.0",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",

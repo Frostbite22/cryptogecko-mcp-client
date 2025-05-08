@@ -1,5 +1,15 @@
 import { Client } from "@modelcontextprotocol/sdk/client/index";
 import { SSEClientTransport  } from "@modelcontextprotocol/sdk/client/sse";
+import { Anthropic } from "@anthropic-ai/sdk" ;
+import {MessageParam,Tool} from "@anthropic-ai/sdk/resources/messages/messages.mjs";
+import dotenv from "dotenv";
+dotenv.config();
+
+
+const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
+if (!ANTHROPIC_API_KEY) {
+  throw new Error("ANTHROPIC_API_KEY is not set");
+}
 
 interface CryptoPrice {
   [coin: string]: {
@@ -65,13 +75,18 @@ interface ErrorResponse {
 
 export class CryptoMcpClient {
   private client: Client;
-  private serverUrl: string;
+  private serverUrl: string;;
+  private tools: Tool[] = []
+  private anthropic : Anthropic ;
 
   constructor(serverUrl: string) {
     this.serverUrl = serverUrl;
     this.client = new Client({
       name: "crypto-mcp-client",
       version: "1.0.0"
+    });
+    this.anthropic = new Anthropic({
+        apiKey: ANTHROPIC_API_KEY
     });
   }
 
@@ -85,6 +100,19 @@ export class CryptoMcpClient {
       );
       await this.client.connect(transport);
       console.log("Connected using SSE transport");
+      const toolsResult = await this.client.listTools();
+      this.tools = toolsResult.tools.map((tool) => {
+        return {
+          name: tool.name,
+          description: tool.description,
+          parameters: tool.parameters
+        };
+      }
+      );
+      console.log("Connected to server with tools:",
+        this.tools.map((tool) => tool.name)
+      );
+
     } catch (error) {
       console.error("Failed to connect to MCP server:", error);
       throw error;
