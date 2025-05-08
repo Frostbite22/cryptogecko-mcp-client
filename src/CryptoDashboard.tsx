@@ -1,6 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { CryptoMcpClient } from "./CryptoMcpClient"; // Your server-side client
+import ChatComponent from "./Chat";
+import Chat from "./Chat";
 
+
+const ANTHROPIC_API_KEY = process.env.REACT_APP_ANTHROPIC_API_KEY;
+if (!ANTHROPIC_API_KEY) {
+  throw new Error("ANTHROPIC_API_KEY is not set");
+}
 interface BitcoinPrice {
   usd: number;
   eur: number;
@@ -24,7 +31,7 @@ const CryptoDashboard = () => {
   useEffect(() => {
     if (!hasRun) {
       const fetchData = async () => {
-        const client = new CryptoMcpClient("http://localhost:8000");
+        const client = new CryptoMcpClient("http://localhost:8000", ANTHROPIC_API_KEY);
 
         try {
           await client.connect();
@@ -87,7 +94,8 @@ const CryptoDashboard = () => {
   return (
     <div className="p-6 max-w-5xl mx-auto space-y-12">
       <h1 className="text-4xl font-bold text-center">Crypto Dashboard</h1>
-
+        {/* include the chat component */}
+        <Chat/>
       {/* Bitcoin Price */}
       <div className="bg-white p-6 rounded-xl shadow-md">
         <h2 className="text-2xl font-semibold mb-2">Bitcoin Price</h2>

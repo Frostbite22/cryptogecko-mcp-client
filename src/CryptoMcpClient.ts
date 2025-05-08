@@ -1,12 +1,11 @@
 import { Client } from "@modelcontextprotocol/sdk/client/index";
 import { SSEClientTransport  } from "@modelcontextprotocol/sdk/client/sse";
 import { Anthropic } from "@anthropic-ai/sdk" ;
-import {MessageParam,Tool} from "@anthropic-ai/sdk/resources/messages/messages.mjs";
-import dotenv from "dotenv";
-dotenv.config();
+import {MessageParam,Tool} from "@anthropic-ai/sdk/resources/messages/messages";
+import { ResultSchema } from "@modelcontextprotocol/sdk/dist/esm/types";
 
 
-const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
+const ANTHROPIC_API_KEY = process.env.REACT_APP_ANTHROPIC_API_KEY;
 if (!ANTHROPIC_API_KEY) {
   throw new Error("ANTHROPIC_API_KEY is not set");
 }
@@ -79,14 +78,15 @@ export class CryptoMcpClient {
   private tools: Tool[] = []
   private anthropic : Anthropic ;
 
-  constructor(serverUrl: string) {
+  constructor(serverUrl: string, apiKey: string |undefined) {
     this.serverUrl = serverUrl;
     this.client = new Client({
       name: "crypto-mcp-client",
       version: "1.0.0"
     });
     this.anthropic = new Anthropic({
-        apiKey: ANTHROPIC_API_KEY
+        apiKey: apiKey,
+        dangerouslyAllowBrowser: true
     });
   }
 
@@ -105,7 +105,11 @@ export class CryptoMcpClient {
         return {
           name: tool.name,
           description: tool.description,
-          parameters: tool.parameters
+          parameters: tool.parameters,
+          input_schema: {
+            type: 'object',
+            properties: tool.parameters
+          }
         };
       }
       );
@@ -119,7 +123,57 @@ export class CryptoMcpClient {
     }
   }
 
- 
+async processQuery(query : string) {
+    const messages : MessageParam[] = [
+        {
+            role: "user",
+            content: query
+        }
+        ];
+    
+        const response = await this.anthropic.messages.create({
+            model : "claude-3-7-sonnet-20250219",
+            max_tokens : 1000,
+            messages,
+            tools : this.tools
+        });
+
+        const finalText = [];
+        const toolResults = [];
+
+        for (const content of response.content){
+            if (content.type === "text") {
+                finalText.push(content.text);
+            } else if (content.type === "tool_use") {
+                const toolName = content.name;
+                const toolArgs = content.input as {[x : string] : unknown} | undefined;
+
+                const result = await this.client.callTool({
+                    name : toolName,
+                    arguments : toolArgs
+                });
+
+                toolResults.push(result);
+
+                finalText.push(`Tool ${toolName} called with arguments: ${JSON.stringify(toolArgs)}`);
+
+                messages.push({
+                    role : "user",
+                    content : result.content as string
+                });
+
+                const response = await this.anthropic.messages.create({
+                    model : "claude-3-7-sonnet-20250219",
+                    max_tokens : 1000,
+                    messages,
+                });
+
+                finalText.push(response.content[0].type === "text" ? response.content[0].text : "");
+            }
+        }
+
+        return finalText.join("\n") ;
+    }
 
   /**
    * Get cryptocurrency prices
@@ -224,11 +278,19 @@ export class CryptoMcpClient {
 
 // Example usage
 async function main() {
-  const client = new CryptoMcpClient("http://localhost:8000");
+  const client = new CryptoMcpClient("http://localhost:8000", ANTHROPIC_API_KEY);
+
+  // example query to process
+    const query = "Get the current price of Bitcoin in USD and EUR, and list the top 10 coins by market cap.";
+
   
   try {
     // Connect to the server
     await client.connect();
+    
+    // Process the query using the Anthropic API
+    const response = await client.processQuery(query);
+    console.log("Processed query response:", response);
     
     // Get Bitcoin price in USD and EUR
     const btcPrice = await client.getPrice({
@@ -254,6 +316,6 @@ async function main() {
 }
 
 // Uncomment to run the example
-// main();
+main();
 
 export default CryptoMcpClient;
