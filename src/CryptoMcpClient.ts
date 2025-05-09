@@ -141,6 +141,13 @@ async processQuery(query : string) {
         const finalText = [];
         const toolResults = [];
 
+        // const prompts = await this.client.listPrompts()
+        // for (const prompt of prompts.prompts) {
+        //     console.log("Prompt:", prompt);
+        // }
+
+        // if the toolName is the same as prompt name, then we can use the prompt
+
         for (const content of response.content){
             if (content.type === "text") {
                 finalText.push(content.text);
@@ -148,9 +155,24 @@ async processQuery(query : string) {
                 const toolName = content.name;
                 const toolArgs = content.input as {[x : string] : unknown} | undefined;
 
+                const args = content.input as {[x : string] : string} | undefined;
+
+                const promptTemplate = await this.client.getPrompt({
+                    name : toolName,
+                    arguments: args});
+
+                console.log("Prompt template:", promptTemplate);
+
+                
+                const enhancedToolArgs = {
+                    ...toolArgs,
+                    prompt: promptTemplate
+                  };
+                  
+                
                 const result = await this.client.callTool({
                     name : toolName,
-                    arguments : toolArgs
+                    arguments : enhancedToolArgs
                 });
 
                 console.log("Tool result:", result);
@@ -158,16 +180,19 @@ async processQuery(query : string) {
                 toolResults.push(result);
 
                 finalText.push(`Tool ${toolName} called with arguments: ${JSON.stringify(toolArgs)}`);
-
+                
+                
                 messages.push({
                     role : "user",
                     content : result.content as string
                 });
 
+
                 const response = await this.anthropic.messages.create({
                     model : "claude-3-7-sonnet-20250219",
                     max_tokens : 1000,
                     messages,
+                    
                 });
 
                 finalText.push(response.content[0].type === "text" ? response.content[0].text : "");

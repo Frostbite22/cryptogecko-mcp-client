@@ -124,9 +124,9 @@ const CryptoDashboard = () => {
                   />
                   <div>
                     <h3 className="font-semibold text-lg">
-                      {coin.name} ({coin.symbol.toUpperCase()})
+                      {coin.name} ({coin.symbol})
                     </h3>
-                    <p>Price: ${coin.current_price.toFixed(2)}</p>
+                    <p>Price: ${coin.current_price}</p>
                     <p
                       className={
                         coin.price_change_percentage_24h >= 0
@@ -134,7 +134,7 @@ const CryptoDashboard = () => {
                           : "text-red-500"
                       }
                     >
-                      24h Change: {coin.price_change_percentage_24h.toFixed(2)}%
+                      24h Change: {coin.price_change_percentage_24h}%
                     </p>
                   </div>
                 </div>
