@@ -155,24 +155,24 @@ async processQuery(query : string) {
                 const toolName = content.name;
                 const toolArgs = content.input as {[x : string] : unknown} | undefined;
 
-                const args = content.input as {[x : string] : string} | undefined;
+                // const args = content.input as {[x : string] : string} | undefined;
 
-                const promptTemplate = await this.client.getPrompt({
-                    name : toolName,
-                    arguments: args});
+                // const promptTemplate = await this.client.getPrompt({
+                //     name : toolName,
+                //     arguments: args});
 
-                console.log("Prompt template:", promptTemplate);
+                // console.log("Prompt template:", promptTemplate);
 
                 
-                const enhancedToolArgs = {
-                    ...toolArgs,
-                    prompt: promptTemplate
-                  };
+                // const enhancedToolArgs = {
+                //     ...toolArgs,
+                //     prompt: promptTemplate
+                //   };
                   
                 
                 const result = await this.client.callTool({
                     name : toolName,
-                    arguments : enhancedToolArgs
+                    arguments : toolArgs
                 });
 
                 console.log("Tool result:", result);
